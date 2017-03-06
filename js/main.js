@@ -281,6 +281,39 @@ else
 {
 }
 
+function GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id)
+{
+	var path = "http://api.lolesports.com/api/v2/highlanderMatchDetails?tournamentId=" + tn_id + "&matchId=" + match_id;
+	console.log(path);
+
+	$.ajax(
+	{
+		url: path,
+		type: 'GET',
+		dataType: 'json',
+		scriptCharset: 'utf-8',
+		data: {},
+
+		success: function (json)
+		{
+			console.log("highlanderMatchDetails : success");
+			console.log(json);
+
+//			for( var i = 0 ; i < json.gameIdMappings.length ; ++i )
+			if( json.gameIdMappings.length > 0 )
+			{
+				var gameHash = json.gameIdMappings[0].gameHash;
+				console.log("http://matchhistory.na.leagueoflegends.com/en/#match-details/" + game_realm + "/" + game_id +"?gameHash=" + gameHash );
+			}
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown)
+		{
+			console.log(XMLHttpRequest.responseText);
+			console.log(textStatus);
+			console.log(errorThrown);
+		}
+	});
+}
 
 function ShowscheduleItem(index,data)
 {
@@ -299,9 +332,31 @@ function ShowscheduleItem(index,data)
 	{
 		var tn_data = data.highlanderTournaments[i];
 		
-		tag.push("startDate : " + tn_data.startDate + "<br>");
-		tag.push("トーナメント名 : " + tn_data.description +"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-		tag.push("title : " + tn_data.title +"<br>");
+		if( tn_data.description.indexOf("2017") != -1 ? true : false ||
+			tn_data.title.indexOf("2017") != -1 ? true : false
+		)
+		{
+			tag.push("startDate : " + tn_data.startDate + "<br>");
+			tag.push("トーナメント名 : " + tn_data.description +"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+			tag.push("title : " + tn_data.title +"<br>");
+
+			var tn_id = data.highlanderTournaments[i].id;
+
+			for( var j in data.highlanderTournaments[i].brackets )
+			{
+				for( var k in data.highlanderTournaments[i].brackets[j].matches)
+				{
+					var match_id = data.highlanderTournaments[i].brackets[j].matches[k].id;
+					for( var l in data.highlanderTournaments[i].brackets[j].matches[k].games)
+					{
+						var game_id = data.highlanderTournaments[i].brackets[j].matches[k].games[l].gameId;
+						var game_realm = data.highlanderTournaments[i].brackets[j].matches[k].games[l].gameRealm;
+
+						GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id);
+					}
+				}
+			}
+		}
 	}
 	newTag.innerHTML = tag.join("");
 	
