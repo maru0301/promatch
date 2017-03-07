@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<title>eSports wikis Ban Pick Maker</title>
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script type="text/javascript" src="./js/prototype.js"></script>
 		<script type="text/javascript" src="./js/main.js"></script>
 	</head>
 	<body>
@@ -13,9 +14,10 @@
 			<article>
 				<section>
 					<div id="input">
-						start : <input type="number" value=1 step=1 style="width:50px;" id="start"/>
-						diff :<input type="number" value=5 step=1 style="width:50px;" id="diff"/><br>
-						output<input type="submit"id="output" onclick="GetMatch($('#start').val() - 0,$('#diff').val() - 0);"/>
+						start : <input type="number" value=3 step=1 style="width:50px;" id="start"/>
+						diff :<input type="number" value=1 step=1 style="width:50px;" id="diff"/><br>
+						output: <input type="submit"id="output" onclick="GetMatch($('#start').val() - 0,$('#diff').val() - 0);"/><br>
+						getulr<input type="submit"id="output" onclick="GetURL();"/><br>
 					</div>
 					<hr>
 				</section>

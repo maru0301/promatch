@@ -281,7 +281,24 @@ else
 {
 }
 
-function GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id)
+function ShowMatchDetailsURL( region_id, url, march_name, gameHash)
+{
+	var target = document.getElementById("scheduleItem_list_"+region_id);
+	var newTag;
+	
+	newTag = document.createElement("match_detail_list_" + gameHash);
+	
+	var tag = new Array();
+	
+	tag.push("<a href="+url+" TARGET=\"_blank\">"+url+"</a> name : " + march_name);
+	tag.push("<br>");
+	
+	newTag.innerHTML = tag.join("");
+	
+	target.appendChild(newTag);
+}
+
+function GethighlanderMatchDetailsJson( region_id, tn_id, match_id, game_realm, game_id, match_name)
 {
 	var path = "http://api.lolesports.com/api/v2/highlanderMatchDetails?tournamentId=" + tn_id + "&matchId=" + match_id;
 	console.log(path);
@@ -297,13 +314,15 @@ function GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id)
 		success: function (json)
 		{
 			console.log("highlanderMatchDetails : success");
-			console.log(json);
+//			console.log(json);
 
 //			for( var i = 0 ; i < json.gameIdMappings.length ; ++i )
 			if( json.gameIdMappings.length > 0 )
 			{
 				var gameHash = json.gameIdMappings[0].gameHash;
-				console.log("http://matchhistory.na.leagueoflegends.com/en/#match-details/" + game_realm + "/" + game_id +"?gameHash=" + gameHash );
+				var url = "http://matchhistory.na.leagueoflegends.com/en/#match-details/" + game_realm + "/" + game_id +"?gameHash=" + gameHash;
+//				console.log( url );
+				ShowMatchDetailsURL(region_id, url, match_name, gameHash);
 			}
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown)
@@ -315,13 +334,14 @@ function GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id)
 	});
 }
 
-function ShowscheduleItem(index,data)
+function ShowscheduleItem(index, data)
 {
 	var target = document.getElementById("scheduleItem_list");
 	var newTag;
 	
 	newTag = document.createElement("scheduleItem_list_"+index);
-	
+	newTag.id = "scheduleItem_list_"+index;
+
 	var tag = new Array();
 	var url = "http://api.lolesports.com/api/v1/scheduleItems?leagueId=" + index;
 	
@@ -351,8 +371,11 @@ function ShowscheduleItem(index,data)
 					{
 						var game_id = data.highlanderTournaments[i].brackets[j].matches[k].games[l].gameId;
 						var game_realm = data.highlanderTournaments[i].brackets[j].matches[k].games[l].gameRealm;
-
-						GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id);
+						var match_name = data.highlanderTournaments[i].brackets[j].matches[k].name;
+						match_name = match_name == undefined ? "" : match_name;
+						
+						if( game_id != undefined && game_realm != undefined)
+							GethighlanderMatchDetailsJson( index, tn_id, match_id, game_realm, game_id, match_name);
 					}
 				}
 			}
@@ -396,4 +419,60 @@ function GetMatch(start_id, diff_num)
 	{
 		GetscheduleItemJson(i);
 	}
+}
+
+function GetURL()
+{
+	/*
+	$.ajax(
+	{
+		url: "http://matchhistory.na.leagueoflegends.com/en/#match-details/TRKR1/890266?gameHash=ab79c17ca6b4d876&tab=overview",
+		type: 'GET',
+		scriptCharset: 'utf-8',
+		data: {},
+		
+		success: function (data)
+		{
+			console.log("GetURL : Success ");
+			
+			console.log(data);
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown)
+		{
+			console.log("GetURL : Fail");
+			console.log(XMLHttpRequest.responseText);
+			console.log(textStatus);
+			console.log(errorThrown);
+		}
+	});
+	*/
+
+	var a = new Ajax.Updater( 
+		"container", 
+		"http://matchhistory.na.leagueoflegends.com/proxy2.hq.scei.sony.co.jp:10080/en/#match-details/TRKR1/890266?gameHash=ab79c17ca6b4d876&tab=overview", 
+		{ 
+			"method": "get", 
+			"parameters": "a=b&c=d&e=f", 
+			onSuccess: function(request) { 
+				// 成功時の処理を記述 
+				alert('成功しました'); 
+				// jsonの値を処理する場合↓↓ 
+				  var json; 
+				  eval("json="+request.responseText); 
+			}, 
+			onComplete: function(request) { 
+				// 完了時の処理を記述 
+				alert('読み込みが完了しました'); 
+				// jsonの値を処理する場合↓↓ 
+				//  var json; 
+				//  eval("json="+request.responseText); 
+			}, 
+			onFailure: function(request) { 
+				alert('読み込みに失敗しました'); 
+			}, 
+			onException: function (request) { 
+				alert('読み込み中にエラーが発生しました'); 
+			} 
+		} 
+	); 
 }
