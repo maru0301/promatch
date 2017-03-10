@@ -421,21 +421,35 @@ function GetMatch(start_id, diff_num)
 	}
 }
 
+var MATCH_HISTORY_JSON = {};
+
 function GetURL()
 {
-	/*
+	
 	$.ajax(
 	{
-		url: "http://matchhistory.na.leagueoflegends.com/en/#match-details/TRKR1/890266?gameHash=ab79c17ca6b4d876&tab=overview",
+//		url: "http://matchhistory.na.leagueoflegends.com/en/#match-details/TRKR1/890266?gameHash=ab79c17ca6b4d876&tab=overview",
+		url: "http://localhost/promatch/Match_History.html",
 		type: 'GET',
+		dataType: 'html',
 		scriptCharset: 'utf-8',
-		data: {},
 		
 		success: function (data)
 		{
 			console.log("GetURL : Success ");
+
+	        var out_html = $($.parseHTML(data));//parse
+
+			console.log(out_html);
+			var data_doc = document.createElement("data");
+			data_doc.innerHTML = data;
+
+			var common_classList = ".section-wrapper .section-wrapper-content .section-wrapper-content-wrapper #main .viewport";
+			var match_data = data_doc.querySelector(common_classList + " .game-header .map-header-content");
+			var game_data = data_doc.querySelector(common_classList).getElementsByClassName("default-1-2");
 			
-			console.log(data);
+			GetMatchData(match_data);
+			GetGameData(game_data);
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown)
 		{
@@ -445,8 +459,8 @@ function GetURL()
 			console.log(errorThrown);
 		}
 	});
-	*/
-
+	
+/*
 	var a = new Ajax.Updater( 
 		"container", 
 		"http://matchhistory.na.leagueoflegends.com/proxy2.hq.scei.sony.co.jp:10080/en/#match-details/TRKR1/890266?gameHash=ab79c17ca6b4d876&tab=overview", 
@@ -473,6 +487,95 @@ function GetURL()
 			onException: function (request) { 
 				alert('読み込み中にエラーが発生しました'); 
 			} 
-		} 
+		}
 	); 
+*/
+}
+
+function GetMatchData(data)
+{
+	var game_mode = data.querySelector(".map-header-mode .binding").innerText;
+	var game_queue = data.querySelector(".map-header-queue .binding").innerText;
+	var game_time = data.querySelector(".map-header-duration .binding").innerText;
+	var game_date = data.querySelector(".map-header-date .binding").innerText;
+
+	MATCH_HISTORY_JSON.game = {};
+
+	MATCH_HISTORY_JSON.game.mode = game_mode;
+	MATCH_HISTORY_JSON.game.queue = game_queue;
+	MATCH_HISTORY_JSON.game.time = game_time;
+	MATCH_HISTORY_JSON.game.date = game_date;
+	
+	console.log(MATCH_HISTORY_JSON);
+}
+
+function GetGameData(data)
+{
+	var blue = data[0];
+	var red = data[1];
+
+	MATCH_HISTORY_JSON.team = [];
+	MATCH_HISTORY_JSON.team[0] = GetTeamData(blue);
+	MATCH_HISTORY_JSON.team[1] = GetTeamData(red);
+
+	console.log(MATCH_HISTORY_JSON);
+}
+
+function GetTeamData(data)
+{
+	var set_data = {};
+	var team_data = data.getElementsByClassName("gs-container team-summary")[0];
+
+	set_data.winText = team_data.getElementsByClassName("game-conclusion")[0].innerText;
+	set_data.winText = set_data.winText.replace( / /g, "");
+	set_data.gold = team_data.getElementsByClassName("gold")[0].innerText;
+	set_data.kill = team_data.getElementsByClassName("kills")[0].innerText | "0";
+
+	var player_data_list = data.getElementsByClassName("classic player");
+	set_data.player = SetPlayerData(player_data_list);
+
+	//Ban
+	set_data.ban = [];
+	for( var i = 0 ; i < data.getElementsByClassName("bans")[0].getElementsByClassName("champion-nameplate").length ; ++i )
+	{
+		set_data.ban[i] = $(data.getElementsByClassName("bans")[0].getElementsByClassName("champion-icon binding")[i].getElementsByTagName("div")[0]).data('rgId');
+	}
+
+	set_data.tower = data.getElementsByClassName("tower-kills")[0].innerText | 0;
+	set_data.inhibitor = data.getElementsByClassName("inhibitor-kills")[0].innerText | 0;
+	set_data.tower = data.getElementsByClassName("tower-kills")[0].innerText | 0;
+	set_data.dragon = data.getElementsByClassName("dragon-kills")[0].innerText | 0;
+	set_data.rift_herald = data.getElementsByClassName("rift-herald-kills")[0].innerText | 0;
+
+	return set_data;
+}
+
+function SetPlayerData(list)
+{
+	var set_data = [];
+
+	for( var i = 0 ; i < list.length ; ++i )
+	{
+		set_data[i] = {};
+		set_data[i].championName = $(list[i].getElementsByClassName("champion-icon binding")[0].getElementsByTagName("div")[0]).data('rgId');
+		set_data[i].lv = list[i].querySelector(".champion-nameplate-level div").innerText | 0;
+		// Spell
+		set_data[i].spell = [];
+		for(var j = 0 ; j < list[i].getElementsByClassName("spell-icon binding").length ; ++j)
+			set_data[i].spell[j] = $(list[i].getElementsByClassName("spell-icon binding")[j].getElementsByTagName("div")[0]).data('rgId');
+		
+		set_data[i].playerName = list[i].getElementsByClassName("champion-nameplate-name")[0].getElementsByTagName("span")[0].innerText;
+		set_data[i].kills = list[i].getElementsByClassName("kda-kda")[0].getElementsByClassName("binding")[0].innerText | 0;
+		set_data[i].death = list[i].getElementsByClassName("kda-kda")[0].getElementsByClassName("binding")[1].innerText | 0;
+		set_data[i].assists = list[i].getElementsByClassName("kda-kda")[0].getElementsByClassName("binding")[2].innerText | 0;
+		// Item
+		set_data[i].item = [];
+		for(var j = 0 ; j < list[i].getElementsByClassName("gs-container gs-no-gutter default-3-col inventory-items")[0].getElementsByClassName("item-icon binding").length ; ++j)
+			set_data[i].item[j] = $(list[i].getElementsByClassName("gs-container gs-no-gutter default-3-col inventory-items")[0].getElementsByClassName("item-icon binding")[j].getElementsByTagName("div")[0]).data('rgId') | 0;
+		
+		set_data[i].cs = list[i].getElementsByClassName("minions-col cs")[0].getElementsByTagName("div")[0].innerText | 0;
+		set_data[i].gold = list[i].getElementsByClassName("gold-col gold")[0].getElementsByTagName("div")[0].innerText;		
+	}
+
+	return set_data;
 }
