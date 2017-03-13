@@ -666,7 +666,7 @@ function GetTeamData2(data)
 	for( var i = 0 ; i < 2 ; ++i )
 	{
 		set_data[i] = {};
-		set_data[i] = SetTeamDataCommon(data.teams[0]);
+		set_data[i] = SetTeamDataCommon(data.teams[i]);
 		set_data[i].player = [];
 		set_data[i].player = GetPlayerData(data, set_data[i].teamId);
 
