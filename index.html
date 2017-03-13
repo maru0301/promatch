@@ -2,17 +2,9 @@
 <html lang="ja">
 	<head>
 		<meta charset="utf-8">
-		<title>eSports wikis Ban Pick Maker</title>
+		<title>Pro Match</title>
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<!--
-		<script type="text/javascript" src="./js/prototype.js"></script>
-		-->
 		<script type="text/javascript" src="./js/main.js"></script>
-		<php
-			$url = "http://webings.net/sample/";                    //Webデータ取得先アドレス
-			$html = file_get_contents($url);                    //Webデータ取得
-			echo $html;                                //Webデータ表示
-		>
 	</head>
 	<body>
 		<main>
@@ -23,8 +15,9 @@
 					<div id="input">
 						start : <input type="number" value=3 step=1 style="width:50px;" id="start"/>
 						diff :<input type="number" value=1 step=1 style="width:50px;" id="diff"/><br>
-						output: <input type="submit"id="output" onclick="GetMatch($('#start').val() - 0,$('#diff').val() - 0);"/><br>
-						getulr<input type="submit"id="output" onclick="GetURL();"/><br>
+						output: <input type="submit" id="output" onclick="GetMatch($('#start').val() - 0,$('#diff').val() - 0);"/><br>
+						getulr<input type="input" id="url"/>
+						<input type="submit" id="geturl" onclick="GetURL($('#url').val());"/><br>
 					</div>
 					<hr>
 				</section>
