@@ -14,6 +14,8 @@ class Tournament {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
+    
     GetscheduleItemsJson(id)
     {
         let self = this;
@@ -43,6 +45,40 @@ class Tournament {
         });
     }
     
+    GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id, game_hashId, match_name)
+    {
+        const self = this;
+        const path = "http://api.lolesports.com/api/v2/highlanderMatchDetails?tournamentId=" + tn_id + "&matchId=" + match_id;
+
+        $.ajax(
+        {
+            url: path,
+            type: 'GET',
+            dataType: 'json',
+            scriptCharset: 'utf-8',
+            data: {},
+
+            success: function (json)
+            {
+                for(let i = 0 ; i < json.gameIdMappings.length ; ++i)
+                {
+                    if(json.gameIdMappings[i].id == game_hashId)
+                    {
+                        const gameHash = json.gameIdMappings[i].gameHash;
+                        const url = "http://matchhistory.na.leagueoflegends.com/en/#match-details/" + game_realm + "/" + game_id +"?gameHash=" + gameHash;
+                        self.ShowMatchDetailsURL( tn_id, game_hashId, match_name, url);
+                    }
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown)
+            {
+                console.log(XMLHttpRequest.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////
 
     ShowscheduleItem(index, data)
@@ -237,40 +273,6 @@ class Tournament {
         target.appendChild(newTag);
     }
 
-    GethighlanderMatchDetailsJson(tn_id, match_id, game_realm, game_id, game_hashId, match_name)
-    {
-        const self = this;
-        const path = "http://api.lolesports.com/api/v2/highlanderMatchDetails?tournamentId=" + tn_id + "&matchId=" + match_id;
-
-        $.ajax(
-        {
-            url: path,
-            type: 'GET',
-            dataType: 'json',
-            scriptCharset: 'utf-8',
-            data: {},
-
-            success: function (json)
-            {
-                for(let i = 0 ; i < json.gameIdMappings.length ; ++i)
-                {
-                    if(json.gameIdMappings[i].id == game_hashId)
-                    {
-                        const gameHash = json.gameIdMappings[i].gameHash;
-                        const url = "http://matchhistory.na.leagueoflegends.com/en/#match-details/" + game_realm + "/" + game_id +"?gameHash=" + gameHash;
-                        self.ShowMatchDetailsURL( tn_id, game_hashId, match_name, url);
-                    }
-                }
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown)
-            {
-                console.log(XMLHttpRequest.responseText);
-                console.log(textStatus);
-                console.log(errorThrown);
-            }
-        });
-    }
-
     ShowMatchDetailsURL(tn_id, game_hashId, march_name, url)
     {
         let target = $(`#${tn_id} #${game_hashId}`)[0];
@@ -281,6 +283,8 @@ class Tournament {
         
         target.innerHTML = tag.join("");
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////
 
     ObjectSort(object)
     {
