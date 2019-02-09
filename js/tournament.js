@@ -8,6 +8,8 @@ class Tournament {
     
     GetMatchs(start_id, diff_num)
     {
+        $("#scheduleItem_list").empty();
+
         for(let i = start_id ; i < (start_id + diff_num) ; ++i)
         {
             this.GetscheduleItemsJson(i);
@@ -92,7 +94,7 @@ class Tournament {
         let tag = new Array();
         let url = `http://api.lolesports.com/api/v1/scheduleItems?leagueId=${index}`;
         
-        tag.push("<a href="+url+" TARGET=\"_blank\">"+url+"</a>");
+        tag.push(`<a href=${url} TARGET=\_blank\>${url}</a>`);
         tag.push("<br>");
         
         let scheduleItem = {};
@@ -106,7 +108,7 @@ class Tournament {
                 continue;
 
             
-            const yearFilter = $('#yearFilter')[0].value;
+            const yearFilter = $("#yearFilter")[0].value;
 
             if(yearFilter != -1)
             {
@@ -269,8 +271,27 @@ class Tournament {
         }
 
         newTag.innerHTML = tag.join("") + newTag.innerHTML;
-        
-        target.appendChild(newTag);
+        let findLi = target.children;
+
+        let add_index = -1;
+        let new_id = newTag.id.replace(/[^0-9^\.]/g,"");
+        for(let i = 0; i < findLi.length; ++i)
+        {
+            let find_id = findLi[i].id.replace(/[^0-9^\.]/g,"");
+            if(parseInt(new_id) < parseInt(find_id))
+            {
+                add_index = i;
+                break;
+            }
+        }
+        if(add_index != -1)
+        {
+            target.insertBefore(newTag,findLi[add_index]);
+        }
+        else
+        {
+            target.appendChild(newTag);
+        }
     }
 
     ShowMatchDetailsURL(tn_id, game_hashId, march_name, url)
